@@ -1,0 +1,22 @@
+{
+  "name": "kendo-state-window",
+  "main": "kendo-state-window.js",
+  "homepage": "https://github.com/djandyr/kendo-state-window",
+  "authors": [
+    "Andy Roberts <djandyr@gmail.com>"
+  ],
+  "description": "AngularJS module that allows kendo-window states when using ui-router",
+  "keywords": [
+    "ui-router",
+    "kendo",
+    "window"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
