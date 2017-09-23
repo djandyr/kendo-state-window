@@ -4,8 +4,7 @@
 
 (function () {
     'use strict';
-
-    "use strict";
+    
     angular.module("kendo.stateWindow", ["ui.router"])
 
     /**
@@ -200,8 +199,6 @@
                             console.log('Opened Window:' + windowName);
                             openWindow(window, $attrs.templateUrl);
                             stateWindowMap.add(windowName, window);
-                        } else {
-                            console.debug('Could not find reference to window ' + windowName);
                         }
                     });
 
