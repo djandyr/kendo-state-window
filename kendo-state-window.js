@@ -195,10 +195,12 @@
                             stateWindowMap.remove(windowName);
                         });
 
-                        if (window && false === stateWindowMap.has(windowName)) {
-                            console.log('Opened Window:' + windowName);
+                        if (window && (false === stateWindowMap.has(windowName))) {
+                            console.debug('Opened Window:' + windowName);
                             openWindow(window, $attrs.templateUrl);
                             stateWindowMap.add(windowName, window);
+                        } else {
+                            console.debug('Could not open window', windowName);
                         }
                     });
 
@@ -228,46 +230,53 @@
         .factory('stateWindowMap', function () {
             var map = [];
 
-            return {
-                add: function(key, value) {
+            var factory = {};
+
+            factory.add = function (key, value) {
+                if (false === factory.has(key)) {
                     map.push({
                         key: key,
                         value: value
                     });
-                },
-                get: function(key) {
-                    for (var i = 0; i < map.length; i++) {
-                        if (key === map[i].key) {
-                            return map[i];
-                        }
-                    }
-                },
-                has: function(key) {
-                    for (var i = 0; i < map.length; i++) {
-                        if (key === map[i].key) {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                },
-                keys: function() {
-                    var keys = [];
-                    for (var i = 0; i < map.length; i++) {
-                        keys.push(map[i].key);
-                    }
-                    return keys;
-                },
-                remove: function(key) {
-                    for (var i = 0; i < map.length; i++) {
-                        if (key === map[i].key) {
-                            return map.splice(i, 1);
-                        }
-                    }
-                },
-                length: function() {
-                    return map.length;
                 }
             };
+
+            factory.get = function (key) {
+                for (var i = 0; i < map.length; i++) {
+                    if (key === map[i].key) {
+                        return map[i];
+                    }
+                }
+            };
+
+            factory.has = function (key) {
+                if(angular.isDefined(factory.get(key))) {
+                    return true;
+                }
+
+                return false;
+            };
+
+            factory.keys = function () {
+                var keys = [];
+                for (var i = 0; i < map.length; i++) {
+                    keys.push(map[i].key);
+                }
+                return keys;
+            };
+
+            factory.remove = function (key) {
+                for (var i = 0; i < map.length; i++) {
+                    if (key === map[i].key) {
+                        return map.splice(i, 1);
+                    }
+                }
+            };
+
+            factory.length = function () {
+                return map.length;
+            };
+
+            return factory;
         });
 })();
