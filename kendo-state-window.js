@@ -210,7 +210,7 @@
                         $element.append(angular.element('<div id="' + appendTo + '"></div>'));
                     }
 
-                    $scope.stateWindowOptions = angular.extend(options, stateWindowConfig.getOptions());
+                    $scope.stateWindowOptions = angular.extend(stateWindowConfig.getOptions(), options);
 
                     if ($attrs.closeState) {
                         $scope.stateWindowOptions.close = function () {
