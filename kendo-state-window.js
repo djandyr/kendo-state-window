@@ -4,7 +4,7 @@
 
 (function () {
     'use strict';
-    
+
     angular.module("kendo.stateWindow", ["ui.router"])
 
     /**
@@ -77,6 +77,10 @@
 
                     if (!options.window.name) {
                         options.window.name = stateName.replace(".", "_");
+                    }
+
+                    if (angular.isDefined(options.template)) {
+                        throw new Error('Template content is not supported.')
                     }
 
                     options.template = '<div state-window="' + options.window.name + '"';
@@ -191,6 +195,10 @@
                     $timeout(function () {
                         var window = $scope[windowName];
 
+                        if (angular.isUndefined(window)) {
+                            throw new Error('Cannot find reference to window ' + windowName);
+                        }
+
                         window.bind("close", function (e) {
                             stateWindowMap.remove(windowName);
                         });
@@ -210,7 +218,7 @@
                         $element.append(angular.element('<div id="' + appendTo + '"></div>'));
                     }
 
-                    $scope.stateWindowOptions = angular.extend(stateWindowConfig.getOptions(), options);
+                    $scope.stateWindowOptions = angular.extend(angular.copy(stateWindowConfig.getOptions()), options);
 
                     if ($attrs.closeState) {
                         $scope.stateWindowOptions.close = function () {
@@ -250,7 +258,7 @@
             };
 
             factory.has = function (key) {
-                if(angular.isDefined(factory.get(key))) {
+                if (angular.isDefined(factory.get(key))) {
                     return true;
                 }
 
