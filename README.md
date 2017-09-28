@@ -40,8 +40,7 @@ $stateProvider
        url: '/home',
        templateUrl: 'home.html'
      })
-     .state('home.window', {
-        parent: 'home',          
+     .state('home.window', {     
         url: '/window1',
         templateUrl: 'window1.html',
         window: {
@@ -52,7 +51,6 @@ $stateProvider
           }
       })
       .state('home.window2', {
-         parent: 'home.window',
          templateUrl: 'window2.html',
          controller: 'Window2Controller',
          url: '/window2',
@@ -139,12 +137,5 @@ The close state can be specified by ``closeState`` on state definition, this wil
 window: {
     name: 'window1',
     closeState: 'home'
-    options: {
-      title: 'Window 1'
-      center: {
-          top: 50,
-          left: 200
-      }
-    }
 }
 ```
