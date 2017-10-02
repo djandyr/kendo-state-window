@@ -114,7 +114,7 @@
          *
          * Directive to configure and open Kendo Window widget
          */
-        .directive('stateWindow', ['$state', 'stateWindowConfig', '$templateRequest', '$timeout', '$compile', '$window', 'stateWindowMap', function ($state, stateWindowConfig, $templateRequest, $timeout, $compile, $window, stateWindowMap) {
+        .directive('stateWindow', ['$state', 'stateWindowConfig', '$templateRequest', '$timeout', '$compile', '$window', 'stateWindowMap', 'RouterService', '$interpolate', '$transitions', function ($state, stateWindowConfig, $templateRequest, $timeout, $compile, $window, stateWindowMap, RouterService, $interpolate, $transitions) {
 
             var openWindow = function (window, url) {
 
@@ -185,7 +185,9 @@
                 template: '<div id="{{windowName}}" kendo-window="{{windowName}}"  k-options="stateWindowOptions" k-visible="false"><ui-view /></div>',
                 replace: false,
                 controller: function ($scope, $element, $attrs) {
-                    var windowName = $attrs.stateWindow, options = {};
+                    var windowName = $attrs.stateWindow,
+                        options = {};
+
                     $scope.windowName = windowName;
 
                     if ($attrs.options) {
@@ -193,6 +195,7 @@
                     }
 
                     $timeout(function () {
+
                         var window = $scope[windowName];
 
                         if (angular.isUndefined(window)) {
@@ -204,9 +207,9 @@
                         });
 
                         if (window && (false === stateWindowMap.has(windowName))) {
-                            console.debug('Opened Window:' + windowName);
-                            openWindow(window, $attrs.templateUrl);
                             stateWindowMap.add(windowName, window);
+                            openWindow(window, $attrs.templateUrl);
+                            console.debug('Opened Window:' + windowName);
                         } else {
                             console.debug('Could not open window', windowName);
                         }
@@ -235,7 +238,7 @@
         /**
          * Map open state windows by name, and kendo window instance
          */
-        .factory('stateWindowMap', function () {
+        .factory('stateWindowMap', ['$timeout', '$q', '$rootScope', function ($timeout, $q, $rootScope) {
             var map = [];
 
             var factory = {};
@@ -246,6 +249,7 @@
                         key: key,
                         value: value
                     });
+                    $rootScope.$broadcast(key+'_created');
                 }
             };
 
@@ -257,11 +261,28 @@
                 }
             };
 
+            factory.getWindow = function(key){
+                var deferred = $q.defer();
+                var deregister = $rootScope.$on(key+'_created', function(){
+                    var found = false;
+                    for (var i = 0; i < map.length; i++) {
+                        if (key === map[i].key) {
+                            found = true;
+                            deferred.resolve(map[i].value);
+                        }
+                    }
+                    if(!found){
+                        deferred.reject();
+                    }
+                    deregister();
+                })
+                return deferred.promise;
+            }
+
             factory.has = function (key) {
                 if (angular.isDefined(factory.get(key))) {
                     return true;
                 }
-
                 return false;
             };
 
@@ -286,5 +307,5 @@
             };
 
             return factory;
-        });
+        }]);
 })();
