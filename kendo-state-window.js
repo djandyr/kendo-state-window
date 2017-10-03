@@ -114,7 +114,7 @@
          *
          * Directive to configure and open Kendo Window widget
          */
-        .directive('stateWindow', ['$state', 'stateWindowConfig', '$templateRequest', '$timeout', '$compile', '$window', 'stateWindowMap', 'RouterService', '$interpolate', '$transitions', function ($state, stateWindowConfig, $templateRequest, $timeout, $compile, $window, stateWindowMap, RouterService, $interpolate, $transitions) {
+        .directive('stateWindow', ['$state', 'stateWindowConfig', '$timeout', '$compile', '$window', 'stateWindowMap', function ($state, stateWindowConfig, $timeout, $compile, $window, stateWindowMap) {
 
             var openWindow = function (window, url) {
 
@@ -238,7 +238,7 @@
         /**
          * Map open state windows by name, and kendo window instance
          */
-        .factory('stateWindowMap', ['$timeout', '$q', '$rootScope', function ($timeout, $q, $rootScope) {
+        .factory('stateWindowMap', ['$q', '$rootScope', function ($q, $rootScope) {
             var map = [];
 
             var factory = {};
