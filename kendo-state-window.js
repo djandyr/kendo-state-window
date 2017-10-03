@@ -114,7 +114,7 @@
          *
          * Directive to configure and open Kendo Window widget
          */
-        .directive('stateWindow', ['$state', 'stateWindowConfig', '$timeout', '$compile', '$window', 'stateWindowMap', function ($state, stateWindowConfig, $timeout, $compile, $window, stateWindowMap) {
+        .directive('stateWindow', ['$state', 'stateWindowConfig', '$timeout', '$compile', '$window', 'stateWindowMap', '$rootScope', function ($state, stateWindowConfig, $timeout, $compile, $window, stateWindowMap, $rootScope) {
 
             var openWindow = function (window, url) {
 
@@ -208,6 +208,7 @@
 
                         if (window && (false === stateWindowMap.has(windowName))) {
                             stateWindowMap.add(windowName, window);
+                            $rootScope.$broadcast('stateWindowCreated', {name: windowName, window: window});
                             openWindow(window, $attrs.templateUrl);
                             console.debug('Opened Window:' + windowName);
                         } else {
@@ -235,10 +236,29 @@
             }
         }])
 
+        .service('StateWindowService', ['$rootScope', 'stateWindowMap', function($rootScope, stateWindowMap){
+            return {
+                onCreated: function(window, callback){
+                    if(stateWindowMap.get(window)){
+                        callback(stateWindowMap.get(window).value);
+                    }
+                    else{
+                        var deregister = $rootScope.$on('stateWindowCreated', function(event, windowData){
+                            if(windowData.name === window){
+                                var Window = stateWindowMap.get(window);
+                                callback(Window.value);
+                                deregister();
+                            }
+                        })
+                    }
+                }
+            }
+        }])
+
         /**
          * Map open state windows by name, and kendo window instance
          */
-        .factory('stateWindowMap', ['$q', '$rootScope', function ($q, $rootScope) {
+        .factory('stateWindowMap', [function () {
             var map = [];
 
             var factory = {};
@@ -249,7 +269,7 @@
                         key: key,
                         value: value
                     });
-                    $rootScope.$broadcast(key+'_created');
+
                 }
             };
 
@@ -260,24 +280,6 @@
                     }
                 }
             };
-
-            factory.getWindow = function(key){
-                var deferred = $q.defer();
-                var deregister = $rootScope.$on(key+'_created', function(){
-                    var found = false;
-                    for (var i = 0; i < map.length; i++) {
-                        if (key === map[i].key) {
-                            found = true;
-                            deferred.resolve(map[i].value);
-                        }
-                    }
-                    if(!found){
-                        deferred.reject();
-                    }
-                    deregister();
-                })
-                return deferred.promise;
-            }
 
             factory.has = function (key) {
                 if (angular.isDefined(factory.get(key))) {
