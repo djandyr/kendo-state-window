@@ -71,8 +71,6 @@
                     options.window = options.data.window;
                 }
 
-                //options.cache = false;
-
                 if (options.window) {
 
                     if (!options.window.name) {
@@ -236,22 +234,28 @@
             }
         }])
 
-        .service('StateWindowService', ['$rootScope', 'stateWindowMap', function($rootScope, stateWindowMap){
+        .service('StateWindowService', ['$rootScope', 'stateWindowMap', '$q', '$timeout', function($rootScope, stateWindowMap, $q, $timeout){
             return {
-                onCreated: function(window, callback){
-                    if(stateWindowMap.get(window)){
-                        callback(stateWindowMap.get(window).value);
+                get: function(windowName){
+                    var deferred = $q.defer();
+                    if(stateWindowMap.get(windowName)){
+                        deferred.resolve(stateWindowMap.get(windowName).value);
                     }
                     else{
                         var deregister = $rootScope.$on('stateWindowCreated', function(event, windowData){
-                            if(windowData.name === window){
-                                var Window = stateWindowMap.get(window);
-                                callback(Window.value);
+                            var resolved = false;
+                            if(windowData.name === windowName){
+                                deferred.resolve(windowData.window);
                                 deregister();
                             }
-                        })
+                        });
+                        $timeout(function(){
+                            deregister();
+                            deferred.reject();
+                        }, 5000);
                     }
-                }
+                    return deferred.promise;
+                },
             }
         }])
 
