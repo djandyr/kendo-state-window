@@ -180,7 +180,7 @@
 
             return {
                 restrict: 'AE',
-                template: '<div id="{{windowName}}" kendo-window="{{windowName}}"  k-options="stateWindowOptions" k-visible="false"></div><ui-view />',
+                template: '<div id="{{windowName}}" kendo-window="{{windowName}}"  k-options="stateWindowOptions" k-visible="false"><ui-view /></div>',
                 replace: false,
                 controller: function ($scope, $element, $attrs) {
                     var windowName = $attrs.stateWindow,
