@@ -206,7 +206,12 @@
 
                         if (window && (false === stateWindowMap.has(windowName))) {
                             stateWindowMap.add(windowName, window);
-                            $rootScope.$broadcast('stateWindowCreated', {name: windowName, window: window});
+                            
+                            $rootScope.$broadcast('stateWindowCreated', {
+                                name: windowName, 
+                                window: window
+                            });
+                            
                             openWindow(window, $attrs.templateUrl);
                             console.debug('Opened Window:' + windowName);
                         } else {
@@ -238,19 +243,21 @@
             return {
                 get: function(windowName){
                     var deferred = $q.defer();
+                    
                     if(stateWindowMap.get(windowName)){
                         deferred.resolve(stateWindowMap.get(windowName).value);
-                    }
-                    else{
-                        var deregister = $rootScope.$on('stateWindowCreated', function(event, windowData){
-                            var resolved = false;
-                            if(windowData.name === windowName){
-                                deferred.resolve(windowData.window);
-                                deregister();
+                    }else{
+                        var createdListener = $rootScope.$on('stateWindowCreated', function(event, data){
+                            if(data.name === windowName){
+                                deferred.resolve(data.window);
+                                // Destroy listener after resolving
+                                createdListener();
                             }
                         });
+                        
+                        // Cleanup orphan listeners
                         $timeout(function(){
-                            deregister();
+                            createdListener();
                             deferred.reject();
                         }, 5000);
                     }
