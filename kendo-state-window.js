@@ -239,7 +239,7 @@
             }
         }])
 
-        .service('StateWindowService', ['$rootScope', 'stateWindowMap', '$q', '$timeout', function($rootScope, stateWindowMap, $q, $timeout){
+        .service('stateWindow', ['$rootScope', 'stateWindowMap', '$q', '$timeout', function($rootScope, stateWindowMap, $q, $timeout){
             return {
                 get: function(windowName){
                     var deferred = $q.defer();
