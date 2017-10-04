@@ -71,8 +71,6 @@
                     options.window = options.data.window;
                 }
 
-                //options.cache = false;
-
                 if (options.window) {
 
                     if (!options.window.name) {
@@ -114,7 +112,7 @@
          *
          * Directive to configure and open Kendo Window widget
          */
-        .directive('stateWindow', ['$state', 'stateWindowConfig', '$templateRequest', '$timeout', '$compile', '$window', 'stateWindowMap', function ($state, stateWindowConfig, $templateRequest, $timeout, $compile, $window, stateWindowMap) {
+        .directive('stateWindow', ['$state', 'stateWindowConfig', '$timeout', '$compile', '$window', 'stateWindowMap', '$rootScope', function ($state, stateWindowConfig, $timeout, $compile, $window, stateWindowMap, $rootScope) {
 
             var openWindow = function (window, url) {
 
@@ -185,7 +183,9 @@
                 template: '<div id="{{windowName}}" kendo-window="{{windowName}}"  k-options="stateWindowOptions" k-visible="false"><ui-view /></div>',
                 replace: false,
                 controller: function ($scope, $element, $attrs) {
-                    var windowName = $attrs.stateWindow, options = {};
+                    var windowName = $attrs.stateWindow,
+                        options = {};
+
                     $scope.windowName = windowName;
 
                     if ($attrs.options) {
@@ -193,6 +193,7 @@
                     }
 
                     $timeout(function () {
+
                         var window = $scope[windowName];
 
                         if (angular.isUndefined(window)) {
@@ -204,9 +205,15 @@
                         });
 
                         if (window && (false === stateWindowMap.has(windowName))) {
-                            console.debug('Opened Window:' + windowName);
-                            openWindow(window, $attrs.templateUrl);
                             stateWindowMap.add(windowName, window);
+                            
+                            $rootScope.$broadcast('stateWindowCreated', {
+                                name: windowName, 
+                                window: window
+                            });
+                            
+                            openWindow(window, $attrs.templateUrl);
+                            console.debug('Opened Window:' + windowName);
                         } else {
                             console.debug('Could not open window', windowName);
                         }
@@ -232,10 +239,37 @@
             }
         }])
 
+        .service('stateWindow', ['$rootScope', 'stateWindowMap', '$q', '$timeout', function($rootScope, stateWindowMap, $q, $timeout){
+            return {
+                get: function(windowName){
+                    var deferred = $q.defer();
+                    
+                    if(stateWindowMap.get(windowName)){
+                        deferred.resolve(stateWindowMap.get(windowName).value);
+                    }else{
+                        var createdListener = $rootScope.$on('stateWindowCreated', function(event, data){
+                            if(data.name === windowName){
+                                deferred.resolve(data.window);
+                                // Destroy listener after resolving
+                                createdListener();
+                            }
+                        });
+                        
+                        // Cleanup orphan listeners
+                        $timeout(function(){
+                            createdListener();
+                            deferred.reject();
+                        }, 5000);
+                    }
+                    return deferred.promise;
+                },
+            }
+        }])
+
         /**
          * Map open state windows by name, and kendo window instance
          */
-        .factory('stateWindowMap', function () {
+        .factory('stateWindowMap', [function () {
             var map = [];
 
             var factory = {};
@@ -246,6 +280,7 @@
                         key: key,
                         value: value
                     });
+
                 }
             };
 
@@ -261,7 +296,6 @@
                 if (angular.isDefined(factory.get(key))) {
                     return true;
                 }
-
                 return false;
             };
 
@@ -286,5 +320,5 @@
             };
 
             return factory;
-        });
+        }]);
 })();
