@@ -69,14 +69,14 @@ FAQ
 
 **How to dynamically change the window title**
 
-Your state definition must be assigned a controller, where kendo-window can be [referenced](http://docs.telerik.com/kendo-ui/AngularJS/introduction#widget-references) by window name once available in scope (unfortunate use of timeout). The kendo-window method [setOptions](http://docs.telerik.com/kendo-ui/api/javascript/ui/window#methods-setOptions) can be used to configure a new window title.
+Your state definition must be assigned a controller, where kendo-window can be [referenced](http://docs.telerik.com/kendo-ui/AngularJS/introduction#widget-references) by window name once available in scope using stateWindow service. The kendo-window method [setOptions](http://docs.telerik.com/kendo-ui/api/javascript/ui/window#methods-setOptions) can be used to configure a new window title.
 
 ```javascript
-app.controller('Window2Controller', function($scope, $timeout) {
-  $timeout(function() {
-    $scope.window.setOptions({
-      title: 'Window 2'
-    });
+app.controller('Window2Controller', function($scope, stateWindow) {
+  stateWindow.get('window2').then(function(window) {
+       window.setOptions({
+         title: 'Home -> Window 1 -> Window2'
+       })
   });
 });
 ```
