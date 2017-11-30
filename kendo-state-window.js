@@ -127,7 +127,9 @@
                         var template = $templateCache.get(url);
                         $timeout(function() {
                             $compile(template)(scope);
-                            window.content(template);
+                            window.refresh({
+                                template: template
+                            });
                         }, true);
                     }
                 }
