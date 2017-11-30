@@ -112,14 +112,24 @@
          *
          * Directive to configure and open Kendo Window widget
          */
-        .directive('stateWindow', ['$state', 'stateWindowConfig', '$timeout', '$compile', '$window', 'stateWindowMap', '$rootScope', function ($state, stateWindowConfig, $timeout, $compile, $window, stateWindowMap, $rootScope) {
+        .directive('stateWindow', ['$state', 'stateWindowConfig', '$timeout', '$compile', '$window', 'stateWindowMap', '$rootScope', '$templateCache', function ($state, stateWindowConfig, $timeout, $compile, $window, stateWindowMap, $rootScope, $templateCache) {
 
-            var openWindow = function (window, url) {
+            var openWindow = function (window, url, scope) {
 
                 // Preload window content using refresh
                 if (angular.isDefined(url)) {
                     window.content("Loading...");
-                    window.refresh(url);
+                    console.debug('Refreshing window content', url);
+
+                    if(angular.isUndefined($templateCache.get(url))) {
+                        window.refresh(url);
+                    }else{
+                        var template = $templateCache.get(url);
+                        $timeout(function() {
+                            $compile(template)(scope);
+                            window.content(template);
+                        }, true);
+                    }
                 }
 
                 if (angular.isDefined(window.options.center)) {
@@ -212,7 +222,7 @@
                                 window: window
                             });
                             
-                            openWindow(window, $attrs.templateUrl);
+                            openWindow(window, $attrs.templateUrl, $scope);
                             console.debug('Opened Window:' + windowName);
                         } else {
                             console.debug('Could not open window', windowName);
